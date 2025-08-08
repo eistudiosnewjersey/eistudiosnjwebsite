@@ -411,8 +411,12 @@
     </div>
 
     <script>
+        // Debug logging
+        console.log('Script loaded');
+        
         // Initialize videos when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
             const videos = document.querySelectorAll('.button-video, .portfolio-video');
             videos.forEach(video => {
                 // Set video properties
@@ -422,7 +426,12 @@
                 video.disablePictureInPicture = true;
                 
                 // Force play all videos
-                video.play().catch(e => console.log('Video autoplay prevented'));
+                video.play().catch(e => console.log('Video autoplay prevented:', e));
+                
+                // Add error handling for video loading
+                video.addEventListener('error', function(e) {
+                    console.log('Video error:', e);
+                });
                 
                 // Prevent picture-in-picture
                 video.addEventListener('webkitbeginfullscreen', function(e) {

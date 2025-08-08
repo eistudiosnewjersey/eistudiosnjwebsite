@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTPS Test - E.I. Studios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .test-container {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+        .status {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.2);
+        }
+        .success { background: rgba(76, 175, 80, 0.3); }
+        .warning { background: rgba(255, 193, 7, 0.3); }
+        .error { background: rgba(244, 67, 54, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔒 HTTPS Test</h1>
+        <div class="status success" id="https-status">
+            Checking HTTPS status...
+        </div>
+        <div class="status" id="domain-status">
+            Checking domain configuration...
+        </div>
+        <p>This page tests if your domain is properly configured for HTTPS on GitHub Pages.</p>
+    </div>
+
+    <script>
+        // Check if we're on HTTPS
+        const isHttps = window.location.protocol === 'https:';
+        const domain = window.location.hostname;
+        
+        document.getElementById('https-status').innerHTML = 
+            isHttps ? 
+            '✅ HTTPS is working!' : 
+            '❌ Not on HTTPS - redirecting...';
+        
+        document.getElementById('https-status').className = 
+            isHttps ? 'status success' : 'status error';
+        
+        document.getElementById('domain-status').innerHTML = 
+            `Domain: ${domain}`;
+        
+        // Redirect to HTTPS if not already
+        if (!isHttps && window.location.hostname !== 'localhost') {
+            window.location.href = window.location.href.replace('http:', 'https:');
+        }
+        
+        console.log('HTTPS Test Page Loaded');
+        console.log('Protocol:', window.location.protocol);
+        console.log('Domain:', domain);
+    </script>
+</body>
+</html>
