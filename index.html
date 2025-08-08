@@ -70,6 +70,27 @@
             background: #000;
         }
         
+        /* Hide video controls and play buttons */
+        video::-webkit-media-controls {
+            display: none !important;
+        }
+        
+        video::-webkit-media-controls-panel {
+            display: none !important;
+        }
+        
+        video::-webkit-media-controls-play-button {
+            display: none !important;
+        }
+        
+        video::-webkit-media-controls-start-playback-button {
+            display: none !important;
+        }
+        
+        video::-webkit-media-controls-overlay-play-button {
+            display: none !important;
+        }
+        
         .button-text {
             font-family: 'Binary', 'Courier New', monospace;
             font-size: 18px;
@@ -282,28 +303,28 @@
     
     <div class="button-container">
         <button class="nav-button active" onclick="showContent('images')">
-            <video class="button-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
+            <video class="button-video" muted loop autoplay playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="true" disablePictureInPicture controls="false" preload="auto">
                 <source src="./Movies/cooperstarscene.mp4" type="video/mp4">
                 <span class="button-text">Previous Work</span>
             </video>
             <span class="button-text">Previous Work</span>
         </button>
         <button class="nav-button" onclick="showContent('newsletter')">
-            <video class="button-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
+            <video class="button-video" muted loop autoplay playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="true" disablePictureInPicture controls="false" preload="metadata">
                 <source src="./Movies/stacytenniscut.mp4" type="video/mp4">
                 <span class="button-text">Newsletter</span>
             </video>
             <span class="button-text">Newsletter</span>
         </button>
         <button class="nav-button" onclick="showContent('game-dev')">
-            <video class="button-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
+            <video class="button-video" muted loop autoplay playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="true" disablePictureInPicture controls="false" preload="auto">
                 <source src="./Movies/gamedevtest1.mkv" type="video/mp4">
                 <span class="button-text">Game Devlog</span>
             </video>
             <span class="button-text">Game Devlog</span>
         </button>
         <button class="nav-button" onclick="showContent('merch')">
-            <video class="button-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
+            <video class="button-video" muted loop autoplay playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="true" disablePictureInPicture controls="false" preload="auto">
                 <source src="./Movies/finaladchop.mp4" type="video/mp4">
                 <span class="button-text">Merch</span>
             </video>
@@ -317,7 +338,7 @@
             <div class="portfolio-grid">
                 <div class="portfolio-item">
                     <div class="portfolio-image">
-                        <video class="portfolio-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
+                        <video class="portfolio-video" muted loop autoplay playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="true" disablePictureInPicture controls="false" preload="auto">
                             <source src="./Movies/littlemissblocks.mp4" type="video/mp4">
                         </video>
                     </div>
@@ -332,7 +353,7 @@
                 
                 <div class="portfolio-item">
                     <div class="portfolio-image">
-                        <video class="portfolio-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
+                        <video class="portfolio-video" muted loop autoplay playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="true" disablePictureInPicture controls="false" preload="auto">
                             <source src="./Movies/CROCBOYFISHINAD.mp4" type="video/mp4">
                         </video>
                     </div>
@@ -431,6 +452,24 @@
             console.log('DOM loaded');
             const videos = document.querySelectorAll('.button-video, .portfolio-video');
             
+            // Enable autoplay after first user interaction (for Safari mobile)
+            let userInteracted = false;
+            const enableAutoplay = () => {
+                if (!userInteracted) {
+                    userInteracted = true;
+                    videos.forEach(video => {
+                        if (video.paused) {
+                            video.play().catch(e => console.log('Autoplay enable failed:', e));
+                        }
+                    });
+                }
+            };
+            
+            // Listen for user interactions
+            document.addEventListener('touchstart', enableAutoplay, { once: true });
+            document.addEventListener('click', enableAutoplay, { once: true });
+            document.addEventListener('scroll', enableAutoplay, { once: true });
+            
             // Function to ensure video plays
             function ensureVideoPlays(video) {
                 if (video.paused || video.ended) {
@@ -446,14 +485,19 @@
             }
             
             videos.forEach(video => {
-                // Set video properties
+                // Set video properties for Safari mobile compatibility
                 video.muted = true;
                 video.loop = true;
                 video.autoplay = true;
                 video.playsInline = true;
+                video.webkitPlaysInline = true;
                 video.disablePictureInPicture = true;
                 video.controls = false;
                 video.preload = 'auto';
+                video.setAttribute('webkit-playsinline', 'true');
+                video.setAttribute('x5-playsinline', 'true');
+                video.setAttribute('x5-video-player-type', 'h5');
+                video.setAttribute('x5-video-player-fullscreen', 'true');
                 
                 // Prevent all mobile interactions
                 video.addEventListener('touchstart', function(e) {
@@ -471,8 +515,20 @@
                     e.stopPropagation();
                 });
                 
-                // Force play all videos
-                video.play().catch(e => console.log('Video autoplay prevented:', e));
+                // Force play all videos with Safari mobile support
+                const playVideo = () => {
+                    video.play().catch(e => {
+                        console.log('Video autoplay prevented:', e);
+                        // For Safari mobile, try again after user interaction
+                        if (e.name === 'NotAllowedError') {
+                            document.addEventListener('touchstart', () => {
+                                video.play().catch(e2 => console.log('Safari play failed:', e2));
+                            }, { once: true });
+                        }
+                    });
+                };
+                
+                playVideo();
                 
                 // Add error handling for video loading
                 video.addEventListener('error', function(e) {
@@ -513,6 +569,20 @@
                     setTimeout(() => ensureVideoPlays(video), 100);
                 });
                 
+                // Handle stalled videos
+                video.addEventListener('stalled', function() {
+                    console.log('Video stalled, attempting to restart...');
+                    setTimeout(() => {
+                        video.load();
+                        video.play().catch(e => console.log('Stalled video restart failed:', e));
+                    }, 1000);
+                });
+                
+                // Handle suspend events (when browser stops loading)
+                video.addEventListener('suspend', function() {
+                    console.log('Video suspended, will retry...');
+                });
+                
                 video.addEventListener('ended', function() {
                     console.log('Video ended, restarting...');
                     video.currentTime = 0;
@@ -537,6 +607,22 @@
                         console.log('Video found paused, restarting...');
                         ensureVideoPlays(video);
                     }
+                    
+                    // Check if video is stuck (not progressing)
+                    if (!video.paused && video.currentTime > 0) {
+                        const lastTime = video.dataset.lastTime || 0;
+                        const currentTime = video.currentTime;
+                        
+                        // If video hasn't progressed in 3 seconds, restart it
+                        if (Math.abs(currentTime - lastTime) < 0.1 && (Date.now() - (video.dataset.lastCheck || 0)) > 3000) {
+                            console.log('Video appears stuck, restarting...');
+                            video.currentTime = 0;
+                            video.play().catch(e => console.log('Stuck video restart failed:', e));
+                        }
+                        
+                        video.dataset.lastTime = currentTime;
+                        video.dataset.lastCheck = Date.now();
+                    }
                 }, 5000);
                 
                 // Special handling for specific videos that have issues
@@ -545,6 +631,32 @@
                     video.addEventListener('loadedmetadata', function() {
                         console.log('Gone Fishing video metadata loaded');
                         video.play().catch(e => console.log('Gone Fishing play failed:', e));
+                    });
+                }
+                
+                // Special handling for stacytenniscut video (large file, buffering issues)
+                if (video.src.includes('stacytenniscut.mp4')) {
+                    console.log('Setting up special handling for Stacy Tennis video');
+                    video.addEventListener('loadedmetadata', function() {
+                        console.log('Stacy Tennis video metadata loaded');
+                        video.play().catch(e => console.log('Stacy Tennis play failed:', e));
+                    });
+                    
+                    // More aggressive buffering for this video
+                    video.addEventListener('waiting', function() {
+                        console.log('Stacy Tennis video waiting for data, attempting to buffer...');
+                        // Try to load more data
+                        video.load();
+                    });
+                    
+                    // Monitor buffering progress
+                    video.addEventListener('progress', function() {
+                        if (video.buffered.length > 0) {
+                            const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                            const duration = video.duration;
+                            const bufferedPercent = (bufferedEnd / duration) * 100;
+                            console.log('Stacy Tennis buffered:', bufferedPercent.toFixed(1) + '%');
+                        }
                     });
                 }
             });
