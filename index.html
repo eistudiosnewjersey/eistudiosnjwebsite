@@ -62,6 +62,11 @@
             transition: all 0.3s ease;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             object-fit: cover;
+            pointer-events: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         
         .button-text {
@@ -145,6 +150,11 @@
             height: 100%;
             object-fit: cover;
             transition: transform 0.3s ease;
+            pointer-events: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         
         .portfolio-item:hover .portfolio-image img,
@@ -270,28 +280,28 @@
     
     <div class="button-container">
         <button class="nav-button active" onclick="showContent('images')">
-            <video class="button-video" muted loop autoplay disablePictureInPicture>
+            <video class="button-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
                 <source src="./Movies/cooperstarscene.mp4" type="video/mp4">
                 <span class="button-text">Previous Work</span>
             </video>
             <span class="button-text">Previous Work</span>
         </button>
         <button class="nav-button" onclick="showContent('newsletter')">
-            <video class="button-video" muted loop autoplay disablePictureInPicture>
+            <video class="button-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
                 <source src="./Movies/stacytenniscut.mp4" type="video/mp4">
                 <span class="button-text">Newsletter</span>
             </video>
             <span class="button-text">Newsletter</span>
         </button>
         <button class="nav-button" onclick="showContent('game-dev')">
-            <video class="button-video" muted loop autoplay disablePictureInPicture>
+            <video class="button-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
                 <source src="./Movies/gamedevtest1.mkv" type="video/mp4">
                 <span class="button-text">Game Devlog</span>
             </video>
             <span class="button-text">Game Devlog</span>
         </button>
         <button class="nav-button" onclick="showContent('merch')">
-            <video class="button-video" muted loop autoplay disablePictureInPicture>
+            <video class="button-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
                 <source src="./Movies/finaladchop.mp4" type="video/mp4">
                 <span class="button-text">Merch</span>
             </video>
@@ -305,7 +315,7 @@
             <div class="portfolio-grid">
                 <div class="portfolio-item">
                     <div class="portfolio-image">
-                        <video class="portfolio-video" muted loop autoplay disablePictureInPicture>
+                        <video class="portfolio-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
                             <source src="./Movies/littlemissblocks.mp4" type="video/mp4">
                         </video>
                     </div>
@@ -320,7 +330,7 @@
                 
                 <div class="portfolio-item">
                     <div class="portfolio-image">
-                        <video class="portfolio-video" muted loop autoplay disablePictureInPicture>
+                        <video class="portfolio-video" muted loop autoplay playsinline disablePictureInPicture controls="false">
                             <source src="./Movies/CROCBOYFISHINAD.mp4" type="video/mp4">
                         </video>
                     </div>
@@ -423,7 +433,25 @@
                 video.muted = true;
                 video.loop = true;
                 video.autoplay = true;
+                video.playsInline = true;
                 video.disablePictureInPicture = true;
+                video.controls = false;
+                
+                // Prevent all mobile interactions
+                video.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+                
+                video.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+                
+                video.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
                 
                 // Force play all videos
                 video.play().catch(e => console.log('Video autoplay prevented:', e));
@@ -440,6 +468,16 @@
                 
                 video.addEventListener('webkitendfullscreen', function(e) {
                     e.preventDefault();
+                });
+                
+                // Ensure videos keep playing
+                video.addEventListener('pause', function() {
+                    video.play().catch(e => console.log('Video restart prevented:', e));
+                });
+                
+                video.addEventListener('ended', function() {
+                    video.currentTime = 0;
+                    video.play().catch(e => console.log('Video restart prevented:', e));
                 });
             });
         });
