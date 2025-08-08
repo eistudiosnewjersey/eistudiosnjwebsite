@@ -67,6 +67,7 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            background: #000;
         }
         
         .button-text {
@@ -155,6 +156,7 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            background: #000;
         }
         
         .portfolio-item:hover .portfolio-image img,
@@ -428,6 +430,21 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded');
             const videos = document.querySelectorAll('.button-video, .portfolio-video');
+            
+            // Function to ensure video plays
+            function ensureVideoPlays(video) {
+                if (video.paused || video.ended) {
+                    video.currentTime = 0;
+                    video.play().catch(e => {
+                        console.log('Video play failed:', e);
+                        // Retry after a short delay
+                        setTimeout(() => {
+                            video.play().catch(e2 => console.log('Video retry failed:', e2));
+                        }, 1000);
+                    });
+                }
+            }
+            
             videos.forEach(video => {
                 // Set video properties
                 video.muted = true;
@@ -436,6 +453,7 @@
                 video.playsInline = true;
                 video.disablePictureInPicture = true;
                 video.controls = false;
+                video.preload = 'auto';
                 
                 // Prevent all mobile interactions
                 video.addEventListener('touchstart', function(e) {
@@ -459,6 +477,25 @@
                 // Add error handling for video loading
                 video.addEventListener('error', function(e) {
                     console.log('Video error:', e);
+                    console.log('Video src:', video.src);
+                    // Retry loading the video
+                    setTimeout(() => {
+                        video.load();
+                        video.play().catch(e2 => console.log('Video reload failed:', e2));
+                    }, 2000);
+                });
+                
+                // Handle video loading issues
+                video.addEventListener('loadstart', function() {
+                    console.log('Video load started:', video.src);
+                });
+                
+                video.addEventListener('loadeddata', function() {
+                    console.log('Video data loaded:', video.src);
+                });
+                
+                video.addEventListener('canplaythrough', function() {
+                    console.log('Video can play through:', video.src);
                 });
                 
                 // Prevent picture-in-picture
@@ -472,13 +509,44 @@
                 
                 // Ensure videos keep playing
                 video.addEventListener('pause', function() {
-                    video.play().catch(e => console.log('Video restart prevented:', e));
+                    console.log('Video paused, restarting...');
+                    setTimeout(() => ensureVideoPlays(video), 100);
                 });
                 
                 video.addEventListener('ended', function() {
+                    console.log('Video ended, restarting...');
                     video.currentTime = 0;
                     video.play().catch(e => console.log('Video restart prevented:', e));
                 });
+                
+                // Monitor video playback
+                video.addEventListener('waiting', function() {
+                    console.log('Video waiting for data...');
+                });
+                
+                video.addEventListener('canplay', function() {
+                    console.log('Video can play');
+                    if (video.paused) {
+                        video.play().catch(e => console.log('Video play on canplay failed:', e));
+                    }
+                });
+                
+                // Periodic check to ensure videos are playing
+                setInterval(() => {
+                    if (video.paused && !video.ended) {
+                        console.log('Video found paused, restarting...');
+                        ensureVideoPlays(video);
+                    }
+                }, 5000);
+                
+                // Special handling for specific videos that have issues
+                if (video.src.includes('CROCBOYFISHINAD.mp4')) {
+                    console.log('Setting up special handling for Gone Fishing video');
+                    video.addEventListener('loadedmetadata', function() {
+                        console.log('Gone Fishing video metadata loaded');
+                        video.play().catch(e => console.log('Gone Fishing play failed:', e));
+                    });
+                }
             });
         });
         
